@@ -27,7 +27,6 @@ return {
   config = function()
     local dap = require 'dap'
     local dapui = require 'dapui'
-
     require('mason-nvim-dap').setup {
       -- Makes a best effort to setup the various debuggers with
       -- reasonable debug configurations
@@ -42,6 +41,7 @@ return {
       ensure_installed = {
         -- Update this to ensure that you have the debuggers for the langs you want
         'delve',
+        'codelldb',
       },
     }
 
@@ -84,6 +84,32 @@ return {
     dap.listeners.before.event_terminated['dapui_config'] = dapui.close
     dap.listeners.before.event_exited['dapui_config'] = dapui.close
 
+    dap.adapters.codelldb = {
+      type = 'server',
+      port = '${port}',
+      host = '127.0.0.1',
+      executable = {
+        command = '/home/cbaillet/.var/app/io.neovim.nvim/data/nvim/mason/bin/codelldb',
+        args = { '--port', '${port}' },
+        detached = false,
+      },
+    }
+
+    dap.configurations.cpp = {
+      {
+        name = 'Launch file',
+        type = 'codelldb',
+        request = 'launch',
+        program = function()
+          return vim.fn.input('Path to executable: ', vim.fn.getcwd() .. '/', 'file')
+        end,
+        cwd = '${workspaceFolder}',
+        stopOnEntry = false,
+        runInTerminal = true,
+        initCommands = { 'settings set target.disable-aslr false' },
+      },
+    }
+    dap.configurations.c = dap.configurations.cpp
     -- Install golang specific config
     require('dap-go').setup {
       delve = {
