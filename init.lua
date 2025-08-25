@@ -760,7 +760,11 @@ require('lazy').setup({
         -- Disable "format_on_save lsp_fallback" for languages that don't
         -- have a well standardized coding style. You can add additional
         -- languages here or re-enable it for the disabled ones.
-        local disable_filetypes = { js = true }
+        local disable_filetypes = {
+          js = true,
+          c = true,
+          -- cpp = true
+        } -- disabling cpp because .h files are considered cpp files
         if disable_filetypes[vim.bo[bufnr].filetype] then
           return nil
         else
@@ -773,6 +777,7 @@ require('lazy').setup({
       formatters_by_ft = {
         lua = { 'stylua' },
         cpp = { 'clang-format' },
+        c = { 'clang-format' },
         -- Conform can also run multiple formatters sequentially
         -- python = { "isort", "black" },
         --
@@ -790,6 +795,9 @@ require('lazy').setup({
       -- Snippet Engine
       {
         'L3MON4D3/LuaSnip',
+        config = function()
+          require('luasnip.loaders.from_lua').lazy_load { paths = '~/.config/nvim/lua/custom/snippets' }
+        end,
         version = '2.*',
         build = (function()
           -- Build Step is needed for regex support in snippets.
